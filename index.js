@@ -49,7 +49,7 @@ const killPokemon = (lossServer, loser) => {
         .then(response => response.json())
         .then(data => {
             
-            let Level = Math.floor(Math.random() * (Math.floor(5) - Math.ceil(1)) + 1);
+            let Level = Math.floor(Math.random() * (Math.floor(100) - Math.ceil(1)) + 1);
             let LevelScale = Level / 10;
             let date = new Date()
             let day = date.getDate();
@@ -304,7 +304,7 @@ client.on('message', message => {
                                     .then(response => response.json())
                                     .then(data => {
                                         
-                                        let Level = Math.floor(Math.random() * (Math.floor(5) - Math.ceil(1)) + 1);
+                                        let Level = Math.floor(Math.random() * (Math.floor(100) - Math.ceil(1)) + 1);
                                         let LevelScale = Level / 10;
                                         let date = new Date()
                                         let day = date.getDate();
