@@ -19,7 +19,9 @@ const buyPokemon = async (trainer) => {
 							.update({money: money[0].money - pokeCost})
 							.then(() => { console.log(`${trainer} bought a pokemon`) })
 					})
-} 
+                } 
+            })
+    }
 
 const dailyMoneyDeposit = async () => {
 	let dailyAmount = 60;
@@ -296,11 +298,12 @@ client.on('message', message => {
 						//User already exists in database
 						
                         knex('trainer_tracker')
-                        .select('day_caught')
+                        .select(['day_caught', 'name'])
                         .where({server: server, trainer: currentTrainer})
                         .then((data) => {
                             dayCaught = data[0].day_caught
 							let pokeName = data[0].name
+                            console.log(data[0])
                             if(checkDay === dayCaught){
 								//checks if the pokemon was caught that same day
                                 knex('trainer_tracker')
@@ -321,9 +324,11 @@ client.on('message', message => {
                                         message.channel.send(dbpoke);
                                     })
 
-                            } else if(checkday !== dayCaught) {
+                            } else if(pokeName === 'dead') {
+                                console.log(pokeName)
 								//pokemon was not caught that day and user is getting a new one
-                                message.channel.send('pokemon not caught today! Here you go!');
+                                message.channel.send('Your pokemon was defeated, here is a new one for $10');
+                                buyPokemon(currentTrainer)
                                 fetch(`https://pokeapi.co/api/v2/pokemon/${Math.floor(Math.random() * (Math.floor(151) - Math.ceil(1)) + 1)}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -347,7 +352,7 @@ client.on('message', message => {
                                         knex('trainer_tracker')
                                             .where({server: server, trainer: currentTrainer})
                                             .update({server: server,
-                                            trainer: 'SecretSpook', 
+                                            trainer: currentTrainer, 
                                             name: myPokemon.name, 
                                             sprite: myPokemon.sprite, 
                                             level: myPokemon.stats.Level, 
@@ -375,9 +380,9 @@ client.on('message', message => {
                                                     })
                                             })
                                     })
-                            } else if(pokeName == 'dead') {
-									buyPokemon(currentTrainer)
-									message.channel.send('your pokemon was DEAD, heres a new one for $10');
+                            } else if(checkDay !== dayCaught) {
+									//buyPokemon(currentTrainer)
+									message.channel.send('Here is your pokemon');
 									fetch(`https://pokeapi.co/api/v2/pokemon/${Math.floor(Math.random() * (Math.floor(151) - Math.ceil(1)) + 1)}`)
 										.then(response => response.json())
 										.then(data => {
@@ -401,7 +406,7 @@ client.on('message', message => {
 											knex('trainer_tracker')
 												.where({server: server, trainer: currentTrainer})
 												.update({server: server,
-												trainer: 'SecretSpook', 
+												trainer: currentTrainer, 
 												name: myPokemon.name, 
 												sprite: myPokemon.sprite, 
 												level: myPokemon.stats.Level, 
