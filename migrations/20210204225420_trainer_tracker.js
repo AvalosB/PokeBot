@@ -4,6 +4,8 @@ exports.up = function(knex) {
         table.increments('user_id'); // adds an auto incrementing PK column
         table.string('server');
         table.string('trainer');
+		table.string('trainer_id');
+		table.integer('money');
         table.string('name');
         table.string('sprite');
         table.integer('level');
