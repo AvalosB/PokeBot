@@ -4,7 +4,24 @@ const client = new Discord.Client()
 const fetch = require('node-fetch')
 const PREFIX = '!'
 
-
+const dailyMoneyDeposit = async () => {
+	let dailyAmount = 250;
+	await knex('trainer_tracker)
+		.select('*')
+		.then((data) => {
+			for(let i in data){
+				knex('trainer_tracker')
+					.select('money')
+					.where({ trainer: data[i].trainer})
+					.then((money) => {
+						knex('trainer_tracker')
+							.where({trainer: data[i].trainer})
+							.update({ money: money + dailyAmount })
+							.then(() => { console.log(`gave ${daya[0].trainer} 250 PokeDollars`) })
+					})
+			}
+		})
+}
 
 const getCurrentPokemon = async (server, trainer) => {
     let pokeObject
@@ -376,5 +393,5 @@ client.on('message', message => {
     break;
 
     case 'check':
-        console.log(message);
+        dailyMoneyDeposit();
     }})
