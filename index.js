@@ -15,7 +15,7 @@ const dailyMoneyDeposit = async () => {
 					.select('money')
 					.where({ trainer: data[i].trainer})
 					.then((money) => {
-                        console.log(money)
+                        			console.log(money)
 						knex('trainer_tracker')
 							.where({trainer: data[i].trainer})
 							.update({ money: money[0].money + dailyAmount })
