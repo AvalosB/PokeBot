@@ -242,13 +242,15 @@ client.on('message', message => {
                                         knex('trainer_tracker')
                                             .where({server: server, trainer: currentTrainer})
                                             .update({ 
-                                            name: myPokemon.name, 
-                                            sprite: myPokemon.sprite, 
-                                            level: myPokemon.stats.Level, 
-                                            health: myPokemon.stats.Health,
-                                            attack: myPokemon.stats.Attack,
-                                            defence: myPokemon.stats.Defence,
-                                            day_caught: myPokemon.DayCaught})
+						    trainer_id: message.author.id,
+						    money: 0,
+						    name: myPokemon.name, 
+						    sprite: myPokemon.sprite, 
+						    level: myPokemon.stats.Level, 
+						    health: myPokemon.stats.Health,
+						    attack: myPokemon.stats.Attack,
+						    defence: myPokemon.stats.Defence,
+						    day_caught: myPokemon.DayCaught})
                                             .then( () => {
                                                 
                                                 knex('trainer_tracker')
