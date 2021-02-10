@@ -4,8 +4,25 @@ const client = new Discord.Client()
 const fetch = require('node-fetch')
 const PREFIX = '!'
 
+const buyPokemon = async (trainer) => {
+	let pokeCost = 10
+	await knex('trainer_tracker')
+		.select('*')
+		.then((data) => {
+			for(let i in data){
+				knex('trainer_tracker')
+					.select('money')
+					.where({ trainer: trainer})
+					.then((money) => {
+						knex('trainer_tracker')
+							.where({trainer: trainer})
+							.update({money: money[0].money - pokeCost})
+							.then(() => { console.log(`${trainer} bought a pokemon`) })
+					})
+} 
+
 const dailyMoneyDeposit = async () => {
-	let dailyAmount = 250;
+	let dailyAmount = 60;
     console.log('ran')
 	await knex('trainer_tracker')
 		.select('*')
@@ -19,7 +36,7 @@ const dailyMoneyDeposit = async () => {
 						knex('trainer_tracker')
 							.where({trainer: data[i].trainer})
 							.update({ money: money[0].money + dailyAmount })
-							.then(() => { console.log(`gave ${data[0].trainer} 250 PokeDollars`) })
+							.then(() => { console.log(`gave ${data[0].trainer} 60 PokeDollars`) })
 					})
 			}
 		})
@@ -70,14 +87,14 @@ const killPokemon = (lossServer, loser) => {
             knex('trainer_tracker')
                 .where({server: lossServer, trainer: loser.trainer})
                 .update({
-                name: myPokemon.name, 
-                sprite: myPokemon.sprite, 
-                level: myPokemon.stats.Level, 
-                health: myPokemon.stats.Health,
-                attack: myPokemon.stats.Attack,
-                defence: myPokemon.stats.Defence,
-                day_caught: myPokemon.DayCaught})
-                .then( () => {console.log('renewed')})
+                name: 'dead', 
+                sprite: null, 
+                level: null, 
+                health: null,
+                attack: null,
+                defence: null,
+                day_caught: null})
+                .then( () => {console.log(`${loser.trainer}'s pokemon died`)})
         })
 }
 
@@ -217,6 +234,7 @@ client.on('message', message => {
                 .where({server: server, trainer: currentTrainer})
                 .then((data) => {
                     if(data.length === 0){
+						//if user does NOT exist in database
                         knex('trainer_tracker')
                             .insert([{server: server, trainer: currentTrainer, wins: 0}])
                             .then( () => { 
@@ -244,15 +262,15 @@ client.on('message', message => {
                                         knex('trainer_tracker')
                                             .where({server: server, trainer: currentTrainer})
                                             .update({ 
-						    trainer_id: message.author.id,
-						    money: 0,
-						    name: myPokemon.name, 
-						    sprite: myPokemon.sprite, 
-						    level: myPokemon.stats.Level, 
-						    health: myPokemon.stats.Health,
-						    attack: myPokemon.stats.Attack,
-						    defence: myPokemon.stats.Defence,
-						    day_caught: myPokemon.DayCaught})
+												trainer_id: message.author.id,
+												money: 50,
+												name: myPokemon.name, 
+												sprite: myPokemon.sprite, 
+												level: myPokemon.stats.Level, 
+												health: myPokemon.stats.Health,
+												attack: myPokemon.stats.Attack,
+												defence: myPokemon.stats.Defence,
+												day_caught: myPokemon.DayCaught })
                                             .then( () => {
                                                 
                                                 knex('trainer_tracker')
@@ -275,14 +293,16 @@ client.on('message', message => {
                             })
                         })
                     }else{
-
-
+						//User already exists in database
+						
                         knex('trainer_tracker')
                         .select('day_caught')
                         .where({server: server, trainer: currentTrainer})
-                        .then((day) => {
-                            dayCaught = day[0].day_caught
+                        .then((data) => {
+                            dayCaught = data[0].day_caught
+							let pokeName = data[0].name
                             if(checkDay === dayCaught){
+								//checks if the pokemon was caught that same day
                                 knex('trainer_tracker')
                                     .select('*')
                                     .where({ server: server, trainer: currentTrainer })
@@ -301,8 +321,8 @@ client.on('message', message => {
                                         message.channel.send(dbpoke);
                                     })
 
-                            } else {
-
+                            } else if(checkday !== dayCaught) {
+								//pokemon was not caught that day and user is getting a new one
                                 message.channel.send('pokemon not caught today! Here you go!');
                                 fetch(`https://pokeapi.co/api/v2/pokemon/${Math.floor(Math.random() * (Math.floor(151) - Math.ceil(1)) + 1)}`)
                                     .then(response => response.json())
@@ -355,7 +375,62 @@ client.on('message', message => {
                                                     })
                                             })
                                     })
-                            }
+                            } else if(pokeName == 'dead') {
+									buyPokemon(currentTrainer)
+									message.channel.send('your pokemon was DEAD, heres a new one for $10');
+									fetch(`https://pokeapi.co/api/v2/pokemon/${Math.floor(Math.random() * (Math.floor(151) - Math.ceil(1)) + 1)}`)
+										.then(response => response.json())
+										.then(data => {
+											
+											let Level = Math.floor(Math.random() * (Math.floor(100) - Math.ceil(1)) + 1);
+											let LevelScale = Level / 10;
+											let date = new Date()
+											let day = date.getDate();
+											let myPokemon = {
+												trainer: currentTrainer,
+												name: data.name,
+												sprite: data.sprites.front_default,
+												stats: {
+													Level: Level,
+													Health: levelScale(data.stats[0].base_stat, LevelScale),
+													Attack: levelScale(data.stats[1].base_stat, LevelScale),
+													Defence: levelScale(data.stats[2].base_stat, LevelScale)
+												},
+												DayCaught: day
+											}
+											knex('trainer_tracker')
+												.where({server: server, trainer: currentTrainer})
+												.update({server: server,
+												trainer: 'SecretSpook', 
+												name: myPokemon.name, 
+												sprite: myPokemon.sprite, 
+												level: myPokemon.stats.Level, 
+												health: myPokemon.stats.Health,
+												attack: myPokemon.stats.Attack,
+												defence: myPokemon.stats.Defence,
+												day_caught: myPokemon.DayCaught})
+												.then( () => {
+													
+													knex('trainer_tracker')
+														.select('*')
+														.where({ server: server, trainer: currentTrainer })
+														.then( data => {
+															let pokeObject = data[0];
+															var dbpoke = new Discord.MessageEmbed()
+																.setImage(pokeObject.sprite)
+																.setTitle(`${pokeObject.trainer}'s PokeMon`)
+																.addField('Name', pokeObject.name)
+																.addField('Level:', pokeObject.level)
+																.addField('HP:', pokeObject.health)
+																.addField('Attack:', pokeObject.attack)
+																.addField('Defence:', pokeObject.defence)
+														
+															message.channel.send(dbpoke);
+														})
+												})
+										})
+									
+								}
                     })
                 
             }
