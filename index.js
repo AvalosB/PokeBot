@@ -6,7 +6,8 @@ const PREFIX = '!'
 
 const dailyMoneyDeposit = async () => {
 	let dailyAmount = 250;
-	await knex('trainer_tracker)
+    console.log('ran')
+	await knex('trainer_tracker')
 		.select('*')
 		.then((data) => {
 			for(let i in data){
@@ -14,10 +15,11 @@ const dailyMoneyDeposit = async () => {
 					.select('money')
 					.where({ trainer: data[i].trainer})
 					.then((money) => {
+                        console.log(money)
 						knex('trainer_tracker')
 							.where({trainer: data[i].trainer})
-							.update({ money: money + dailyAmount })
-							.then(() => { console.log(`gave ${daya[0].trainer} 250 PokeDollars`) })
+							.update({ money: money[0].money + dailyAmount })
+							.then(() => { console.log(`gave ${data[0].trainer} 250 PokeDollars`) })
 					})
 			}
 		})
