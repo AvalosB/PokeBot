@@ -7,7 +7,7 @@ module.exports = {
       connection: {
         host: '127.0.0.1',
         database: 'poke_tracker',
-        user:     'postgres',
+        user:     'Brian',
         password: '123'
       }
     },
