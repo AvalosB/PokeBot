@@ -236,7 +236,7 @@ const getYourPokemon = (trainer) => {
 }
 
 
-client.login('ODA0MDI1NDMwMDcwOTE5MTk5.YBGVCA.yE6j8tnv746kfoO3hr5_P3Fp7Ew')
+client.login('')
 
 client.once('ready', () => {
     console.log('Logged In')
